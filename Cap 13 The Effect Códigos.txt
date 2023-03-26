@@ -1,0 +1,343 @@
+
+install.packages('modelsummary')
+
+install.packages('causaldata')
+
+# Or dev version (currently identical):
+# If necessary: install.packages('remotes')
+install.packages('remotes')
+
+remotes::install_github('NickCH-K/causaldata/R/')
+
+
+
+#1 
+library(tidyverse); library(modelsummary)
+res <- causaldata::restaurant_inspections
+
+res <- res %>%
+  # Create NumberofLocations
+  group_by(business_name) %>%
+  mutate(NumberofLocations = n())
+
+# Perform the first, one-predictor regression
+# use the lm() function, with ~ telling us what 
+# the dependent variable varies over
+m1 <- lm(inspection_score ~ NumberofLocations, data = res)
+
+# Now add year as a control
+# Just use + to add more terms to the regression
+m2 <- lm(inspection_score ~ NumberofLocations + Year, data = res)
+
+# Give msummary a list() of the models we want in our table
+# and save to the file "regression_table.html"
+# (see help(msummary) for other options)
+msummary(list(m1, m2),
+         stars=TRUE)
+         #output= 'regression_table.html')
+# Default significance stars are +/*/**/*** .1/.05/.01/.001. Social science
+# standard */**/*** .1/.05/.01 can be restored with
+msummary(list(m1, m2),
+         stars=c('*' = .1, '**' = .05, '***' = .01))
+      #   output= 'regression_table.html')
+
+
+
+#2
+# Load packages and data
+
+install.packages('margins')
+
+library(tidyverse); library(modelsummary); library(margins)
+df <- causaldata::restaurant_inspections
+
+# Use I() to add calculations of variables
+# Including squares
+m1 <- lm(inspection_score ~ NumberofLocations + 
+           I(NumberofLocations^2) + 
+           Year, data = df)
+
+# Print the results to a table
+msummary(m1, stars = c('*' = .1, '**' = .05, '***' = .01))
+
+# Use margins to calculate the effect of locations
+# at 100 locations.
+# variables is the variable we want the effect of
+# and at is a list of values to set before looking for the effect
+m1 %>%
+  margins(variables = 'NumberofLocations',
+          at = list(NumberofLocations = 100)) %>%
+  summary()
+
+# The AME (average marginal effect) is what we want here
+# And the standard error (SE) is reported, too
+
+
+
+
+
+#3
+# Use * to include two variables independently
+# plus their interaction
+# (: is interaction-only, we rarely use it)
+m1 <- lm(inspection_score ~ NumberofLocations*Weekend +
+           Year, data = df)
+
+# Print the results to a table
+msummary(m1, stars = c('*' = .1, '**' = .05, '***' = .01))
+
+# Use margins to calculate the effect of locations
+# on the weekend
+# variables is the variable we want the effect of
+# and at is a list of values to set before looking for the effect
+m1 %>%
+  margins(variables = 'NumberofLocations',
+          at = list(Weekend = TRUE)) %>%
+  summary()
+
+m1 %>%
+  margins(variables = 'NumberofLocations',
+          at = list(Weekend = FALSE)) %>%
+  summary()
+
+# The AME (average marginal effect) is what we want here
+# And the standard error (SE) is reported, too
+
+
+
+
+
+#4
+# Load packages and data
+library(tidyverse); library(modelsummary); library(margins)
+df <- causaldata::restaurant_inspections
+
+# Use the glm() function with
+# the family = binomial(link = 'logit') option
+m1 <- glm(Weekend ~ Year, data = df,
+          family = binomial(link = 'logit'))
+
+# See the results
+msummary(m1, stars = c('*' = .1, '**' = .05, '***' = .01))
+
+# Get the average marginal effect of year
+m1 %>%
+  margins(variables = 'Year') %>%
+  summary()
+
+
+
+
+#5
+# Load packages
+install.packages('tidyverse')
+library(tidyverse)
+
+# For approach 1
+install.packages('AER')
+install.packages('sandwich')
+library(AER); library(sandwich)
+
+# For approach 2
+library(modelsummary)
+
+# For approach 3
+install.packages('fixest')
+library(fixest)
+
+df <- causaldata::restaurant_inspections
+
+# In R there are many ways to get at robust SEs
+# For the first two methods we'll look at, we need to estimate
+# the regression on its own
+# (most types of regressions will work, not just lm()!)
+m1 <- lm(inspection_score ~ Year + Weekend, data = df)
+
+# First, the classic way, sending our regression
+# object to AER::coeftest(), specifying the kind
+# of library(sandwich) estimator we want
+# vcovHC for heteroskedasticity-consistent
+coeftest(m1, vcov = vcovHC(m1))
+
+# Second, we can take that same regression object
+# and, do the robust SEs inside of our msummary()
+msummary(m1, vcov = 'robust',
+         stars = c('*' = .1, '**' = .05, '***' = .01))
+
+# Third, we can skip all that and use a regression
+# function with robust SEs built in, like
+# fixest::feols()
+feols(inspection_score ~ Year + Weekend, data = df, se = 'hetero')
+# (this object can be sent to modelsummary
+# or summary as normal)
+
+
+
+
+
+
+#6
+# Load packages
+library(tidyverse)
+# For approach 1
+library(AER); library(sandwich)
+
+df <- causaldata::restaurant_inspections
+
+# Turn into a time series
+df <- df %>%
+  group_by(Year) %>%
+  summarize(Avg_Score = mean(inspection_score),
+            Pct_Weekend = mean(Weekend)) %>%
+  # Only the years without gaps
+  dplyr::filter(Year <= 2009)
+
+# Perform our time series regression
+m1 <- lm(Avg_Score ~ Pct_Weekend, data = df)
+
+# Use the same coeftest method from robust SEs, but use the 
+# NeweyWest matrix. We can set maximum lags ourselves,
+# or it will pick one using an automatic procedure (read the docs!)
+coeftest(m1, vcov = NeweyWest)
+
+
+
+
+
+#7
+# Load packages
+library(tidyverse)
+# For approach 1
+library(AER); library(sandwich)
+# For approach 2
+library(modelsummary)
+# For approach 3
+library(fixest)
+
+df <- causaldata::restaurant_inspections
+
+# In R there are many ways to get at clustered SEs. For the first 
+# two methods we'll look at, we need to estimate the regression on 
+# its own. (most commands will work, not just lm()!)
+m1 <- lm(inspection_score ~ Year + Weekend, data = df)
+
+# First, the classic way, sending our regression object to 
+# AER::coeftest(), specifying the kind of library(sandwich) estimator. 
+# We want vcovCL for clustering.
+# Note the ~ before Weekend; this is technically a formula
+coeftest(m1, vcov = vcovCL(m1, ~Weekend))
+
+# Second, we can pass it to msummary which will cluster if we send
+# a formula with the cluster variable to vcov
+msummary(m1, vcov = ~Weekend,
+         stars = c('*' = .1, '**' = .05, '***' = .01))
+
+# Third, we can use a regression function with clustered SEs built in, 
+# like fixest::feols(). Don't forget the ~ before Weekend.
+feols(inspection_score ~ Year + Weekend, 
+      cluster = ~Weekend,
+      data = df)
+
+
+
+
+
+#8
+# Load packages and data
+library(tidyverse); library(modelsummary); library(sandwich)
+df <- causaldata::restaurant_inspections
+
+# Let's run our standard model from before
+m <- lm(inspection_score ~ Year + Weekend, data = df)
+
+# And use the vcov argument of msummary with vcovBS from the 
+# sandwich package to get boostrap SEs with 2000 samples
+msummary(m, vcov = function(x) vcovBS(x, R = 2000),
+         stars = c('*' = .1, '**' = .05, '***' = .01))
+
+
+
+
+
+#9
+# Load packages and data
+library(tidyverse); library(modelsummary)
+df <- causaldata::restaurant_inspections
+
+# Turn into one observation per chain
+df <- df %>%
+  group_by(business_name) %>%
+  summarize(Num_Inspections = n(),
+            Avg_Score = mean(inspection_score),
+            First_Year = min(Year))
+
+# Add the weights argument to lm
+m1 <- lm(Avg_Score ~ First_Year, 
+         data = df,
+         weights = Num_Inspections)
+
+msummary(m1, stars = c('*' = .1, '**' = .05, '***' = .01))
+
+
+
+
+
+
+#10
+# Load packages and data
+
+install.packages('glmnet')
+
+library(tidyverse); library(modelsummary); library(glmnet)
+df <- causaldata::restaurant_inspections
+
+# We don't want business_name as a predictor 
+df <- df %>%
+  select(-business_name)
+
+# the LASSO command we'll use takes a matrix of predictors
+# rather than a regression formula. So!  Create a matrix with 
+# all variables and interactions (other than the dependent variable)
+# -1 to omit the intercept
+X <- model.matrix(lm(inspection_score ~ (.)^2 - 1, 
+                     data = df))
+# Add squared terms of numeric variables
+numeric.var.names <- names(df)[2:3]
+X <- cbind(X,as.matrix(df[,numeric.var.names]^2))
+colnames(X)[8:9] <- paste(numeric.var.names,'squared')
+
+# Create a matrix for our dependent variable too
+Y <- as.matrix(df$inspection_score)
+
+# Standardize all variables
+X <- scale(X); Y <- scale(Y)
+
+# We use cross-validation to select our lambda
+# family = 'gaussian' does OLS (as opposed to, say, logit)
+# nfolds = 20 does cross-validation with 20 "chunks"
+# alpha = 1 does LASSO (2 would be ridge)
+cv.lasso <- cv.glmnet(X, Y, 
+                      family = "gaussian", 
+                      nfolds = 20, alpha = 1)
+
+# I'll pick the lambda that maximizes out-of-sample prediction
+# which is cv.lasso$lambda.min and then run the actual LASSO model
+lasso.model <- glmnet(X, Y, 
+                      family = "gaussian", 
+                      alpha = 1, 
+                      lambda = cv.lasso$lambda.min)
+
+# coefficients are shown in the beta element - . means LASSO dropped it
+lasso.model$beta
+
+# The only one it dropped is Year:Weekend
+# Now we can run OLS without that dropped Year:Weekend
+m1 <- lm(inspection_score ~ 
+           (.)^2 
+         - Year:Weekend
+         + I(Year)^2
+         + I(NumberofLocations)^2,
+         data = df)
+
+msummary(m1, stars = c('*' = .1, '**' = .05, '***' = .01))
+

@@ -1,0 +1,647 @@
+
+> res <- causaldata::restaurant_inspections
+> res <- res %>%
++   # Create NumberofLocations
++   group_by(business_name) %>%
++   mutate(NumberofLocations = n())
+> m1 <- lm(inspection_score ~ NumberofLocations, data = res)
+> m2 <- lm(inspection_score ~ NumberofLocations + Year, data = res)
+> msummary(list(m1, m2),
++          stars=TRUE)
+> msummary(list(m1, m2),
++          stars=c('*' = .1, '**' = .05, '***' = .01))
+> df <- causaldata::restaurant_inspections
+> # Including squares
+> m1 <- lm(inspection_score ~ NumberofLocations + 
++            I(NumberofLocations^2) + 
++            Year, data = df)
+> msummary(m1, stars = c('*' = .1, '**' = .05, '***' = .01))
+> m1 %>%
++   margins(variables = 'NumberofLocations',
++           at = list(NumberofLocations = 100)) %>%
++   summary()
+            factor NumberofLocations     AME     SE        z      p
+ NumberofLocations          100.0000 -0.0597 0.0007 -84.5050 0.0000
+   lower   upper
+ -0.0611 -0.0583
+> margins(variables = 'NumberofLocations',
++           at = list(NumberofLocations = 100))
+Error in find_data(model, parent.frame()) : 
+  argumento "model" ausente, sem padrão
+> df <- causaldata::restaurant_inspections
+> m1 <- lm(inspection_score ~ NumberofLocations + 
++            I(NumberofLocations^2) + 
++            Year, data = df)
+> msummary(m1, stars = c('*' = .1, '**' = .05, '***' = .01))
+> m1 %>%
++   margins(variables = 'NumberofLocations',
++           at = list(NumberofLocations = 100)) %>%
++   summary()
+            factor NumberofLocations     AME     SE        z      p
+ NumberofLocations          100.0000 -0.0597 0.0007 -84.5050 0.0000
+   lower   upper
+ -0.0611 -0.0583
+> m1 <- lm(inspection_score ~ NumberofLocations*Weekend +
++            Year, data = df)
+> View(m1)
+> # Print the results to a table
+> msummary(m1, stars = c('*' = .1, '**' = .05, '***' = .01))
+> # Use margins to calculate the effect of locations
+> # on the weekend
+> # variables is the variable we want the effect of
+> # and at is a list of values to set before looking for the effect
+> m1 %>%
++   margins(variables = 'NumberofLocations',
++           at = list(Weekend = TRUE)) %>%
++   summary()
+            factor Weekend     AME     SE       z      p   lower   upper
+ NumberofLocations  1.0000 -0.0289 0.0075 -3.8507 0.0001 -0.0437 -0.0142
+> 
+> # The AME (average marginal effect) is what we want here
+> # And the standard error (SE) is reported, too
+> m1 %>%
++   margins(variables = 'NumberofLocations',
++           at = list(Weekend = FALSE)) %>%
++   summary()
+            factor Weekend     AME     SE        z      p   lower   upper
+ NumberofLocations  0.0000 -0.0191 0.0004 -43.7587 0.0000 -0.0200 -0.0183
+> res <- causaldata::restaurant_inspections
+> 
+> res <- res %>%
++   # Create NumberofLocations
++   group_by(business_name) %>%
++   mutate(NumberofLocations = n())
+> 
+> # Perform the first, one-predictor regression
+> # use the lm() function, with ~ telling us what 
+> # the dependent variable varies over
+> m1 <- lm(inspection_score ~ NumberofLocations, data = res)
+> 
+> # Now add year as a control
+> # Just use + to add more terms to the regression
+> m2 <- lm(inspection_score ~ NumberofLocations + Year, data = res)
+> msummary(list(m1, m2),
++          stars=TRUE)
+>          #output= 'regression_table.html')
+> # Default significance stars are +/*/**/*** .1/.05/.01/.001. Social science
+> # standard */**/*** .1/.05/.01 can be restored with
+> msummary(list(m1, m2),
++          stars=c('*' = .1, '**' = .05, '***' = .01))
+>       #   output= 'regression_table.html')
+> #2
+> # Load packages and data
+> 
+> install.packages('margins')
+Error in install.packages : Updating loaded packages
+> 
+> library(tidyverse); library(modelsummary); library(margins)
+> df <- causaldata::restaurant_inspections
+> 
+> # Use I() to add calculations of variables
+> # Including squares
+> m1 <- lm(inspection_score ~ NumberofLocations + 
++            I(NumberofLocations^2) + 
++            Year, data = df)
+> 
+> # Print the results to a table
+> msummary(m1, stars = c('*' = .1, '**' = .05, '***' = .01))
+> 
+> # Use margins to calculate the effect of locations
+> # at 100 locations.
+> # variables is the variable we want the effect of
+> # and at is a list of values to set before looking for the effect
+> m1 %>%
++   margins(variables = 'NumberofLocations',
++           at = list(NumberofLocations = 100)) %>%
++   summary()
+            factor NumberofLocations     AME     SE        z      p   lower   upper
+ NumberofLocations          100.0000 -0.0597 0.0007 -84.5050 0.0000 -0.0611 -0.0583
+> install.packages("margins")
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Warning in install.packages :
+  package ‘margins’ is in use and will not be installed
+> df <- causaldata::restaurant_inspections
+> m1 <- lm(inspection_score ~ NumberofLocations + 
++            I(NumberofLocations^2) + 
++            Year, data = df)
+> 
+> # Print the results to a table
+> msummary(m1, stars = c('*' = .1, '**' = .05, '***' = .01))
+> m1 %>%
++   margins(variables = 'NumberofLocations',
++           at = list(NumberofLocations = 100)) %>%
++   summary()
+            factor NumberofLocations     AME     SE        z      p   lower   upper
+ NumberofLocations          100.0000 -0.0597 0.0007 -84.5050 0.0000 -0.0611 -0.0583
+> m1 <- lm(inspection_score ~ NumberofLocations*Weekend +
++            Year, data = df)
+> 
+> # Print the results to a table
+> msummary(m1, stars = c('*' = .1, '**' = .05, '***' = .01))
+> m1 %>%
++   margins(variables = 'NumberofLocations',
++           at = list(Weekend = TRUE)) %>%
++   summary()
+            factor Weekend     AME     SE       z      p   lower   upper
+ NumberofLocations  1.0000 -0.0289 0.0075 -3.8507 0.0001 -0.0437 -0.0142
+> 
+> m1 %>%
++   margins(variables = 'NumberofLocations',
++           at = list(Weekend = FALSE)) %>%
++   summary()
+            factor Weekend     AME     SE        z      p   lower   upper
+ NumberofLocations  0.0000 -0.0191 0.0004 -43.7587 0.0000 -0.0200 -0.0183
+> library(tidyverse); library(modelsummary); library(margins)
+> df <- causaldata::restaurant_inspections
+> 
+> # Use the glm() function with
+> # the family = binomial(link = 'logit') option
+> m1 <- glm(Weekend ~ Year, data = df,
++           family = binomial(link = 'logit'))
+> View(m1)
+> df <- causaldata::restaurant_inspections
+> m1 <- glm(Weekend ~ Year, data = df,
++           family = binomial(link = 'logit'))
+> View(m1)
+> # See the results
+> msummary(m1, stars = c('*' = .1, '**' = .05, '***' = .01))
+> m1 %>%
++   margins(variables = 'Year') %>%
++   summary()
+ factor     AME     SE       z      p   lower   upper
+   Year -0.0002 0.0001 -2.0773 0.0378 -0.0004 -0.0000
+> # Load packages
+> library(tidyverse)
+> # For approach 1
+> library(AER); library(sandwich)
+Error in library(AER) : there is no package called ‘AER’
+> # For approach 2
+> library(modelsummary)
+> # For approach 3
+> library(fixest)
+Error in library(fixest) : there is no package called ‘fixest’
+> install.packages('AER')
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Installing package into ‘C:/Users/MARCELO/AppData/Local/R/win-library/4.2’
+(as ‘lib’ is unspecified)
+also installing the dependencies ‘rprojroot’, ‘diffobj’, ‘brio’, ‘desc’, ‘pkgload’, ‘praise’, ‘waldo’, ‘testthat’, ‘numDeriv’, ‘SparseM’, ‘MatrixModels’, ‘minqa’, ‘nloptr’, ‘Rcpp’, ‘RcppEigen’, ‘carData’, ‘abind’, ‘pbkrtest’, ‘quantreg’, ‘lme4’, ‘car’, ‘lmtest’, ‘sandwich’, ‘zoo’, ‘Formula’
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/rprojroot_2.0.3.zip'
+Content type 'application/zip' length 109344 bytes (106 KB)
+downloaded 106 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/diffobj_0.3.5.zip'
+Content type 'application/zip' length 990416 bytes (967 KB)
+downloaded 967 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/brio_1.1.3.zip'
+Content type 'application/zip' length 38317 bytes (37 KB)
+downloaded 37 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/desc_1.4.2.zip'
+Content type 'application/zip' length 326619 bytes (318 KB)
+downloaded 318 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/pkgload_1.3.2.zip'
+Content type 'application/zip' length 178673 bytes (174 KB)
+downloaded 174 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/praise_1.0.0.zip'
+Content type 'application/zip' length 19854 bytes (19 KB)
+downloaded 19 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/waldo_0.4.0.zip'
+Content type 'application/zip' length 102072 bytes (99 KB)
+downloaded 99 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/testthat_3.1.7.zip'
+Content type 'application/zip' length 2107166 bytes (2.0 MB)
+downloaded 2.0 MB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/numDeriv_2016.8-1.1.zip'
+Content type 'application/zip' length 116102 bytes (113 KB)
+downloaded 113 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/SparseM_1.81.zip'
+Content type 'application/zip' length 1026945 bytes (1002 KB)
+downloaded 1002 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/MatrixModels_0.5-1.zip'
+Content type 'application/zip' length 425118 bytes (415 KB)
+downloaded 415 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/minqa_1.2.5.zip'
+Content type 'application/zip' length 448187 bytes (437 KB)
+downloaded 437 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/nloptr_2.0.3.zip'
+Content type 'application/zip' length 1001761 bytes (978 KB)
+downloaded 978 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/Rcpp_1.0.10.zip'
+Content type 'application/zip' length 2812755 bytes (2.7 MB)
+downloaded 2.7 MB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/RcppEigen_0.3.3.9.3.zip'
+Content type 'application/zip' length 2276150 bytes (2.2 MB)
+downloaded 2.2 MB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/carData_3.0-5.zip'
+Content type 'application/zip' length 1820854 bytes (1.7 MB)
+downloaded 1.7 MB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/abind_1.4-5.zip'
+Content type 'application/zip' length 63750 bytes (62 KB)
+downloaded 62 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/pbkrtest_0.5.2.zip'
+Content type 'application/zip' length 191696 bytes (187 KB)
+downloaded 187 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/quantreg_5.94.zip'
+Content type 'application/zip' length 1726620 bytes (1.6 MB)
+downloaded 1.6 MB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/lme4_1.1-32.zip'
+Content type 'application/zip' length 4518946 bytes (4.3 MB)
+downloaded 4.3 MB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/car_3.1-1.zip'
+Content type 'application/zip' length 1706061 bytes (1.6 MB)
+downloaded 1.6 MB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/lmtest_0.9-40.zip'
+Content type 'application/zip' length 405733 bytes (396 KB)
+downloaded 396 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/sandwich_3.0-2.zip'
+Content type 'application/zip' length 1453017 bytes (1.4 MB)
+downloaded 1.4 MB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/zoo_1.8-11.zip'
+Content type 'application/zip' length 1018486 bytes (994 KB)
+downloaded 994 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/Formula_1.2-5.zip'
+Content type 'application/zip' length 160722 bytes (156 KB)
+downloaded 156 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/AER_1.2-10.zip'
+Content type 'application/zip' length 2557367 bytes (2.4 MB)
+downloaded 2.4 MB
+
+package ‘rprojroot’ successfully unpacked and MD5 sums checked
+package ‘diffobj’ successfully unpacked and MD5 sums checked
+package ‘brio’ successfully unpacked and MD5 sums checked
+package ‘desc’ successfully unpacked and MD5 sums checked
+package ‘pkgload’ successfully unpacked and MD5 sums checked
+package ‘praise’ successfully unpacked and MD5 sums checked
+package ‘waldo’ successfully unpacked and MD5 sums checked
+package ‘testthat’ successfully unpacked and MD5 sums checked
+package ‘numDeriv’ successfully unpacked and MD5 sums checked
+package ‘SparseM’ successfully unpacked and MD5 sums checked
+package ‘MatrixModels’ successfully unpacked and MD5 sums checked
+package ‘minqa’ successfully unpacked and MD5 sums checked
+package ‘nloptr’ successfully unpacked and MD5 sums checked
+package ‘Rcpp’ successfully unpacked and MD5 sums checked
+package ‘RcppEigen’ successfully unpacked and MD5 sums checked
+package ‘carData’ successfully unpacked and MD5 sums checked
+package ‘abind’ successfully unpacked and MD5 sums checked
+package ‘pbkrtest’ successfully unpacked and MD5 sums checked
+package ‘quantreg’ successfully unpacked and MD5 sums checked
+package ‘lme4’ successfully unpacked and MD5 sums checked
+package ‘car’ successfully unpacked and MD5 sums checked
+package ‘lmtest’ successfully unpacked and MD5 sums checked
+package ‘sandwich’ successfully unpacked and MD5 sums checked
+package ‘zoo’ successfully unpacked and MD5 sums checked
+package ‘Formula’ successfully unpacked and MD5 sums checked
+package ‘AER’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\MARCELO\AppData\Local\Temp\Rtmpg3wr4K\downloaded_packages
+> install.packages('sandwich')
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Installing package into ‘C:/Users/MARCELO/AppData/Local/R/win-library/4.2’
+(as ‘lib’ is unspecified)
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/sandwich_3.0-2.zip'
+Content type 'application/zip' length 1453017 bytes (1.4 MB)
+downloaded 1.4 MB
+
+package ‘sandwich’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\MARCELO\AppData\Local\Temp\Rtmpg3wr4K\downloaded_packages
+> library(AER); library(sandwich)
+Carregando pacotes exigidos: car
+Carregando pacotes exigidos: carData
+
+Attaching package: ‘car’
+
+The following object is masked from ‘package:dplyr’:
+
+    recode
+
+The following object is masked from ‘package:purrr’:
+
+    some
+
+Carregando pacotes exigidos: lmtest
+Carregando pacotes exigidos: zoo
+
+Attaching package: ‘zoo’
+
+The following objects are masked from ‘package:base’:
+
+    as.Date, as.Date.numeric
+
+Carregando pacotes exigidos: sandwich
+Carregando pacotes exigidos: survival
+> # For approach 2
+> library(modelsummary)
+> # For approach 3
+> install.packages('fixest')
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Installing package into ‘C:/Users/MARCELO/AppData/Local/R/win-library/4.2’
+(as ‘lib’ is unspecified)
+also installing the dependency ‘dreamerr’
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/dreamerr_1.2.3.zip'
+Content type 'application/zip' length 783901 bytes (765 KB)
+downloaded 765 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/fixest_0.11.1.zip'
+Content type 'application/zip' length 4314423 bytes (4.1 MB)
+downloaded 4.1 MB
+
+package ‘dreamerr’ successfully unpacked and MD5 sums checked
+package ‘fixest’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\MARCELO\AppData\Local\Temp\Rtmpg3wr4K\downloaded_packages
+> library(fixest)
+> df <- causaldata::restaurant_inspections
+> m1 <- lm(inspection_score ~ Year + Weekend, data = df)
+> View(m1)
+> coeftest(m1, vcov = vcovHC(m1))
+
+t test of coefficients:
+
+               Estimate  Std. Error t value  Pr(>|t|)    
+(Intercept) 185.3800329  12.1498220 15.2578 < 2.2e-16 ***
+Year         -0.0456403   0.0060438 -7.5516 4.434e-14 ***
+WeekendTRUE   2.0571662   0.3529064  5.8292 5.632e-09 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+> # Second, we can take that same regression object
+> # and, do the robust SEs inside of our msummary()
+> msummary(m1, vcov = 'robust',
++          stars = c('*' = .1, '**' = .05, '***' = .01))
+> feols(inspection_score ~ Year + Weekend, data = df, se = 'hetero')
+OLS estimation, Dep. Var.: inspection_score
+Observations: 27,178 
+Standard-errors: Heteroskedasticity-robust 
+              Estimate Std. Error  t value   Pr(>|t|)    
+(Intercept) 185.380033  12.148904 15.25899  < 2.2e-16 ***
+Year         -0.045640   0.006043 -7.55219 4.4144e-14 ***
+WeekendTRUE   2.057166   0.351245  5.85678 4.7735e-09 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 6.24818   Adj. R2: 0.00267
+> #6
+> # Load packages
+> library(tidyverse)
+> # For approach 1
+> library(AER); library(sandwich)
+> df <- causaldata::restaurant_inspections
+> df <- df %>%
++   group_by(Year) %>%
++   summarize(Avg_Score = mean(inspection_score),
++             Pct_Weekend = mean(Weekend)) %>%
++   # Only the years without gaps
++   dplyr::filter(Year <= 2009)
+> View(df)
+> # Perform our time series regression
+> m1 <- lm(Avg_Score ~ Pct_Weekend, data = df)
+> View(m1)
+> coeftest(m1, vcov = NeweyWest)
+
+t test of coefficients:
+
+            Estimate Std. Error t value  Pr(>|t|)    
+(Intercept)  93.7736     1.9631  47.767 4.081e-11 ***
+Pct_Weekend  42.7314    48.6663   0.878    0.4055    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+> df <- causaldata::restaurant_inspections
+> m1 <- lm(inspection_score ~ Year + Weekend, data = df)
+> coeftest(m1, vcov = vcovCL(m1, ~Weekend))
+
+t test of coefficients:
+
+               Estimate  Std. Error  t value  Pr(>|t|)    
+(Intercept) 185.3800329   3.2643454   56.789 < 2.2e-16 ***
+Year         -0.0456403   0.0016238  -28.108 < 2.2e-16 ***
+WeekendTRUE   2.0571662   0.0014011 1468.257 < 2.2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+> msummary(m1, vcov = ~Weekend,
++          stars = c('*' = .1, '**' = .05, '***' = .01))
+> feols(inspection_score ~ Year + Weekend, 
++       cluster = ~Weekend,
++       data = df)
+OLS estimation, Dep. Var.: inspection_score
+Observations: 27,178 
+Standard-errors: Clustered (Weekend) 
+              Estimate Std. Error   t value   Pr(>|t|)    
+(Intercept) 185.380033   3.264345   56.7893 0.01120904 *  
+Year         -0.045640   0.001624  -28.1076 0.02263987 *  
+WeekendTRUE   2.057166   0.001401 1468.2537 0.00043359 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 6.24818   Adj. R2: 0.00267
+> df <- causaldata::restaurant_inspections
+> m <- lm(inspection_score ~ Year + Weekend, data = df)
+> msummary(m, vcov = function(x) vcovBS(x, R = 2000),
++          stars = c('*' = .1, '**' = .05, '***' = .01))
+> df <- causaldata::restaurant_inspections
+> df <- df %>%
++   group_by(business_name) %>%
++   summarize(Num_Inspections = n(),
++             Avg_Score = mean(inspection_score),
++             First_Year = min(Year))
+> View(df)
+> m1 <- lm(Avg_Score ~ First_Year, 
++          data = df,
++          weights = Num_Inspections)
+> 
+> msummary(m1, stars = c('*' = .1, '**' = .05, '***' = .01))
+> install.packages('glmnet')
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Installing package into ‘C:/Users/MARCELO/AppData/Local/R/win-library/4.2’
+(as ‘lib’ is unspecified)
+also installing the dependencies ‘iterators’, ‘foreach’, ‘shape’
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/iterators_1.0.14.zip'
+Content type 'application/zip' length 353226 bytes (344 KB)
+downloaded 344 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/foreach_1.5.2.zip'
+Content type 'application/zip' length 148310 bytes (144 KB)
+downloaded 144 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/shape_1.4.6.zip'
+Content type 'application/zip' length 786271 bytes (767 KB)
+downloaded 767 KB
+
+Warning in install.packages :
+  the 'wininet' method is deprecated for http:// and https:// URLs
+tentando a URL 'https://cran.rstudio.com/bin/windows/contrib/4.2/glmnet_4.1-7.zip'
+Content type 'application/zip' length 2447212 bytes (2.3 MB)
+downloaded 2.3 MB
+
+package ‘iterators’ successfully unpacked and MD5 sums checked
+package ‘foreach’ successfully unpacked and MD5 sums checked
+package ‘shape’ successfully unpacked and MD5 sums checked
+package ‘glmnet’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\MARCELO\AppData\Local\Temp\Rtmpg3wr4K\downloaded_packages
+> library(tidyverse); library(modelsummary); library(glmnet)
+Carregando pacotes exigidos: Matrix
+
+Attaching package: ‘Matrix’
+
+The following objects are masked from ‘package:tidyr’:
+
+    expand, pack, unpack
+
+Loaded glmnet 4.1-7
+> df <- causaldata::restaurant_inspections
+> df <- df %>%
++   select(-business_name)
+> View(df)
+> X <- model.matrix(lm(inspection_score ~ (.)^2 - 1, 
++                      data = df))
+> View(X)
+> numeric.var.names <- names(df)[2:3]
+> View(X)
+> X <- cbind(X,as.matrix(df[,numeric.var.names]^2))
+> View(X)
+> colnames(X)[8:9] <- paste(numeric.var.names,'squared')
+> View(X)
+> # Create a matrix for our dependent variable too
+> Y <- as.matrix(df$inspection_score)
+> View(Y)
+> # Standardize all variables
+> X <- scale(X); Y <- scale(Y)
+> View(X)
+> View(Y)
+> View(X)
+> cv.lasso <- cv.glmnet(X, Y, 
++                       family = "gaussian", 
++                       nfolds = 20, alpha = 1)
+> View(cv.lasso)
+> View(cv.lasso)
+> lasso.model <- glmnet(X, Y, 
++                       family = "gaussian", 
++                       alpha = 1, 
++                       lambda = cv.lasso$lambda.min)
+> View(lasso.model)
+> View(lasso.model)
+> lasso.model$beta
+9 x 1 sparse Matrix of class "dgCMatrix"
+                                         s0
+Year                          -0.0496933820
+NumberofLocations             -1.1281884176
+WeekendFALSE                  -0.0049024323
+WeekendTRUE                    .           
+Year:NumberofLocations         .           
+Year:WeekendTRUE               0.0002087634
+NumberofLocations:WeekendTRUE -0.0055607783
+Year squared                  -0.0746412335
+NumberofLocations squared      0.9453048415
+> m1 <- lm(inspection_score ~ 
++            (.)^2 
++          - Year:Weekend
++          + I(Year)^2
++          + I(NumberofLocations)^2,
++          data = df)
+> 
+> msummary(m1, stars = c('*' = .1, '**' = .05, '***' = .01))
